@@ -6,46 +6,40 @@ using System.Threading.Tasks;
 using BuildABot.Core.MessageHandlers;
 using BuildABot.Util;
 using BuildABot.Core;
+using BuildABot.UC;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
+using System.Configuration;
+using PocBotLib;
 using Log;
 
 
-namespace GenericBotConsole
+namespace LyncBotConsole
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Logger.Debug("main function");
-            try{
+            try
+            {
+                Logger.Debug("main bot function");
+                Debug.Listeners.Add(new ConsoleTraceListener());
+
+                String applicationUserAgent = ConfigurationManager.AppSettings["applicationuseragent"];
+                String applicationurn = ConfigurationManager.AppSettings["applicationurn"];
+                Logger.Debug("applicationUserAgent : " + applicationUserAgent);
+                Logger.Debug("applicationurn : " + applicationurn);
+                UCBotHost ucBotHost = new UCBotHost(applicationUserAgent, applicationurn);
+                Logger.Debug("ucBotHost init: " + ucBotHost.ToString());
+                Logger.Debug("ucBot is running...");
+                ucBotHost.Run();
                 
-                Bot bot = new Bot();
-                bot.Replied += new ReplyEventHandler(bot_Replied);
-                string userMessage = Console.ReadLine();
-                while (userMessage != "exit")
-                {
-                    Logger.Debug("user message : " + userMessage);
-                   
-                    bot.ProcessMessage(userMessage);
-                    userMessage = Console.ReadLine();
-                }
-            }catch(Exception e){
-                
-                Logger.Debug("error " + e);
             }
-        }
-        static void bot_Replied(object sender, ReplyEventArgs e) {
-            Logger.Debug("bot_Replied function");
-            try {
-                foreach (ReplyMessage replyMessage in e.Reply.Messages)
-                {
-                    Logger.Debug("message from bot " + replyMessage.Content);
-                }
+            catch (Exception e) {
+                Logger.Debug("error : " + e);
+                Console.ReadLine();
             }
-            catch (Exception ex) {
-                Logger.Debug("error " + ex);
-            }
-          
+            
         }
     }
 }
